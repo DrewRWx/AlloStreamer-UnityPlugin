@@ -78,8 +78,11 @@ static void* g_TexturePointer;
 unsigned int logCount=0;
 unsigned char* pixels;
 
-const int i_width = 1280;
-const int i_height = 720;
+//const int i_width = 1280;
+//const int i_height = 720;
+
+const int i_width = 1024;
+const int i_height = 576;
 
 extern "C" void EXPORT_API SetTextureFromUnity (void* texturePtr)
 {
@@ -109,7 +112,12 @@ extern "C" void EXPORT_API SetTextureFromUnity (void* texturePtr)
 }
 
 
-
+extern "C" void setLog()
+{
+    pluginFile = fopen("/home/sphere/Documents/drew/foureyes/AlloStreamerServer_120413/Logs/UnityServerPlugin.log", "w");
+    fprintf(pluginFile, "Initializing interprocess memory...\n");
+    fflush(pluginFile);
+}
 // --------------------------------------------------------------------------
 // UnitySetGraphicsDevice
 
@@ -286,8 +294,8 @@ static void DoRendering (const float* worldMatrix, const float* identityMatrix, 
 		// update native texture from code
 		if (g_TexturePointer)
 		{
-//            fprintf(pluginFile, "texture pointer: %u\n", g_TexturePointer);
-//            fflush(pluginFile);
+            fprintf(pluginFile, "texture pointer: %u\n", g_TexturePointer);
+            fflush(pluginFile);
 			GLuint gltex = (GLuint)(size_t)(g_TexturePointer);
 			glBindTexture (GL_TEXTURE_2D, gltex);
 			int texWidth, texHeight;
@@ -296,8 +304,8 @@ static void DoRendering (const float* worldMatrix, const float* identityMatrix, 
             
 //            fprintf(pluginFile, "%i: Set texture.\n", logCount);
 //            fflush(pluginFile);
-//            fprintf(pluginFile, "Tex width: %i  Tex height: %i\n", texWidth, texHeight);
-//			fflush(pluginFile);
+            fprintf(pluginFile, "Tex width: %i  Tex height: %i\n", texWidth, texHeight);
+			fflush(pluginFile);
             
             //if(startedServer)
             //{
@@ -398,25 +406,32 @@ static void DoRendering (const float* worldMatrix, const float* identityMatrix, 
 	#endif
 }
 
-
 #define PORT 7000
 float a1 = 0;
-float a2 = 0; 
+float a2 = 0;
 float a3 = 0;
+float a4 = 0;
+float a5 = 0;
+float a6 = 0;
+float a7 = 0;
 extern "C" {
     int startStream();
     int initInterprocessMemory();
 	float getRoll();
 	float getPitch();
 	float getYaw();
+    float getTouchX();
+    float getTouchY();
+    float getDragX();
+    float getDragY();
 	void endServer();
+    void oscStart();
 }
 void endServer()
 {
+    data->shutdownServer = true;
     fprintf(pluginFile, "Ending server...\n");
     fflush(pluginFile);
-	data->shutdownServer = true;
-
 }
 
 float getRoll()
@@ -433,27 +448,47 @@ float getYaw()
 {
 	return a1;
 }
+float getTouchX()
+{
+	return a4;
+}
+float getTouchY()
+{
+	return a5;
+}
+float getDragX()
+{
+	return a6;
+}
+float getDragY()
+{
+	return a7;
+}
 
 class OrientationPacketListener : public osc::OscPacketListener {
 protected:
-
-    virtual void ProcessMessage( const osc::ReceivedMessage& m, 
-				const IpEndpointName& remoteEndpoint )
+    
+    virtual void ProcessMessage( const osc::ReceivedMessage& m,
+                                const IpEndpointName& remoteEndpoint )
     {
         (void) remoteEndpoint; // suppress unused parameter warning
-
+        
         try{
             // example of parsing single messages. osc::OsckPacketListener
             // handles the bundle traversal.
             
             // example #2 -- argument iterator interface, supports
-            // reflection for overloaded messages (eg you can call 
+            // reflection for overloaded messages (eg you can call
             // (*arg)->IsBool() to check if a bool was passed etc).
             osc::ReceivedMessage::const_iterator arg = m.ArgumentsBegin();
             a1 = (arg++)->AsFloat();
             a2 = (arg++)->AsFloat();
             a3 = (arg++)->AsFloat();
-
+            a4 = (arg++)->AsFloat();
+            a5 = (arg++)->AsFloat();
+            a6 = (arg++)->AsFloat();
+            a7 = (arg++)->AsFloat();
+            
             if( arg != m.ArgumentsEnd() )
                 throw osc::ExcessArgumentException();
             
@@ -461,51 +496,36 @@ protected:
 			//fflush(pluginFile);
             
         }catch( osc::Exception& e ){
-            // any parsing errors such as unexpected argument types, or 
+            // any parsing errors such as unexpected argument types, or
             // missing arguments get thrown as exceptions.
             std::cout << "error while parsing message: "
-                << m.AddressPattern() << ": " << e.what() << "\n";
+            << m.AddressPattern() << ": " << e.what() << "\n";
         }
     }
 };
 
-
-
-void* oscStart(void*)
+UdpListeningReceiveSocket* s = NULL;
+//UdpListeningReceiveSocket s;
+void oscStart()
 {
 	/*
-	* Start OSC client
-	*/
+     * Start OSC client
+     */
 	OrientationPacketListener listener;
-    UdpListeningReceiveSocket s(
-            IpEndpointName( IpEndpointName::ANY_ADDRESS, PORT ),
-            &listener );
-
-    std::cout << "press ctrl-c to end\n";
-
-    s.RunUntilSigInt();
+    s = new UdpListeningReceiveSocket(IpEndpointName( IpEndpointName::ANY_ADDRESS, PORT ), &listener );
+    
+    s->Run();
 }
-
 
 unsigned char testPixels[i_width*i_height*3];
 int initInterprocessMemory()
 {
-	/*
-	* Open log file
-	*/
-    pluginFile = fopen("/home/mathieu/Desktop/Logs/UnityServerPlugin.log", "w");
-    fprintf(pluginFile, "Initializing interprocess memory...\n");
-    fflush(pluginFile);
+    
 
-	/*
-	* Create OSC Client thread
-	*/
-	pthread_t oscThread;
-	pthread_create(&oscThread, NULL, oscStart, NULL);
     
 	/*
-	* Initialize shared memory between Unity plugin and the Live 555 server/encoder
-	*/
+     * Initialize shared memory between Unity plugin and the Live 555 server/encoder
+     */
     //Remove shared memory on construction and destruction
     struct shm_remove
     {
@@ -522,26 +542,50 @@ int initInterprocessMemory()
     //Map the whole shared memory in this process
     region = mapped_region(shm, read_write);
     
+    
     //Write all the memory to 1
     //std::memset(region.get_address(), 2, region.get_size());
-
+    
     //Get the address of the mapped region
     void * addr       = region.get_address();
-
+    
     //Construct the shared structure in memory
     data = new (addr) FrameData;
-    
-	/*
-	* Start server process
-	*/
-    if(0 != std::system("/home/mathieu/Desktop/AlloStreamerServer/AlloServer/AlloServer"))
-        return 1;
-    
-    fprintf(pluginFile,"after process\n");
-    fflush(pluginFile);
-  
 
-    return 0;
+
+    
+
+    
+//    for(int i=0; i<2048*2048*3; i++)
+//    {
+//        data->pixels[i] = rand() % 255;
+//    }
+
+	/*
+     * Start server process
+     * Will not return until endServer() is called
+     */
+    
+//   if(0 != std::system("/home/mathieu/Desktop/AlloStreamerServer/AlloServer/AlloServer"))
+//        return 1;
+    
+    //AlloServer is finished, so shutdown OSC
+while(true)
+{
+usleep(16000);
 }
 
+    if(s != NULL)
+    {
+        s->AsynchronousBreak();
+        delete s;
+        s = NULL;
+    }
+    
+    fprintf(pluginFile,"AlloServer exited\n");
+    fflush(pluginFile);
+    
+    
+    return 0;
+}
 
