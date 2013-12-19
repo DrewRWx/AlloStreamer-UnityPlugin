@@ -9,7 +9,7 @@ LIBS=\
 
 INCLUDE=\
 -I$(deps)/boost_1_54/build/include \
--I../AlloServer
+-I../AlloStreamer-Server
 
 SRC= RenderingPlugin.cpp
 
