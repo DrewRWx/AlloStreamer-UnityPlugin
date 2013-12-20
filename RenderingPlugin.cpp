@@ -81,12 +81,6 @@ static void* g_TexturePointer;
 unsigned int logCount=0;
 unsigned char* pixels;
 
-//const int i_width = 1280;
-//const int i_height = 720;
-
-const int i_width = 1024;
-const int i_height = 576;
-
 extern "C" void EXPORT_API SetTextureFromUnity (void* texturePtr)
 {
 	// A script calls this at initialization time; just remember the texture pointer here.
@@ -96,7 +90,7 @@ extern "C" void EXPORT_API SetTextureFromUnity (void* texturePtr)
     
 
     
-    //pixels = new unsigned char[i_width*i_height*3];
+    //pixels = new unsigned char[image_width*image_height*3];
     
     //    if ((image = (unsigned char*)malloc(3*image_width*image_height*sizeof(char))) == NULL) {
     //        fprintf(stderr,"Failed to allocate memory for image\n");
@@ -527,7 +521,7 @@ void oscStart()
     s->Run();
 }
 
-unsigned char testPixels[i_width*i_height*3];
+unsigned char testPixels[image_width*image_height*3];
 int initInterprocessMemory()
 {
     
