@@ -25,6 +25,9 @@ extern "C" {
 #include <unistd.h>
 #include <sys/types.h>
 
+#include "../shared2.h"
+#include <sys/stat.h>
+
 unsigned char *image = NULL;
 
 
@@ -114,7 +117,14 @@ extern "C" void EXPORT_API SetTextureFromUnity (void* texturePtr)
 
 extern "C" void setLog()
 {
-    pluginFile = fopen("/home/sphere/Documents/drew/foureyes/AlloStreamerServer_120413/Logs/UnityServerPlugin.log", "w");
+		struct stat sb;
+    if (stat(log_dir.c_str(), &sb) != 0)
+    {
+      mkdir(log_dir.c_str(), S_IRWXU);
+    }
+
+		std::string plugin_log = log_dir + "UnityServerPlugin.log";
+    pluginFile = fopen(plugin_log.c_str(), "w");
     fprintf(pluginFile, "Initializing interprocess memory...\n");
     fflush(pluginFile);
 }
