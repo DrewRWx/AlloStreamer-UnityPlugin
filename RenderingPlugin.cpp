@@ -25,7 +25,6 @@ extern "C" {
 #include <unistd.h>
 #include <sys/types.h>
 
-#include "../shared2.h"
 #include <sys/stat.h>
 
 unsigned char *image = NULL;
