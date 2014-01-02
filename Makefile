@@ -10,4 +10,4 @@ INCLUDE=\
 SRC= RenderingPlugin.cpp
 
 all:
-	g++ -shared -o libUnityServerPlugin.so -fPIC $(SRC) $(INCLUDE) $(LIBS)
+	g++ -O2 -shared -o libUnityServerPlugin.so -fPIC $(SRC) $(INCLUDE) $(LIBS)
