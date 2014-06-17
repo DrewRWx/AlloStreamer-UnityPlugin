@@ -1,4 +1,4 @@
-UNAME := $(shell uname)
+include ../Makefile.inc
 
 ifeq ($(UNAME),Darwin)
 LIBS=\
@@ -24,7 +24,10 @@ INCLUDE+=\
 SRC= RenderingPlugin.cpp
 
 all: clean
-	g++ -O2 -shared -o libUnityServerPlugin.so -fPIC $(SRC) $(INCLUDE) $(LIBS)
+	g++ -g -shared -o libUnityServerPlugin.so -fPIC $(SRC) $(INCLUDE) $(LIBS)
+
+pedantic: clean
+	g++ -pedantic -g -shared -o libUnityServerPlugin.so -fPIC $(SRC) $(INCLUDE) $(LIBS)
 
 clean:
-	rm libUnityServerPlugin.so
+	rm -f libUnityServerPlugin.so
