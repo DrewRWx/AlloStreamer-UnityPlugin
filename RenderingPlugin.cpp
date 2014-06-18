@@ -84,24 +84,24 @@ extern "C" void EXPORT_API SetTextureFromUnity (void* texturePtr)
 	// Will update texture pixels each frame from the plugin rendering event (texture update
 	// needs to happen on the rendering thread).
 	g_TexturePointer = texturePtr;
-    
 
-    
+
+
     //pixels = new unsigned char[image_width*image_height*3];
-    
+
     //    if ((image = (unsigned char*)malloc(3*image_width*image_height*sizeof(char))) == NULL) {
     //        fprintf(stderr,"Failed to allocate memory for image\n");
     //        return 0;
     //    }
     //
-    
-    
+
+
     //Returns the error code from starting a new thread (0 if thread was started)
     //int result = startRTSP();
-    
+
     //fprintf(pluginFile, "StartRTSP() returned %i\n", result);
     //fflush(pluginFile);
-    
+
     startedServer = true;
 }
 
@@ -110,7 +110,7 @@ extern "C" void setLog()
 {
 	std::string plugin_log = log_dir + "UnityServerPlugin.log";
   pluginFile = fopen(plugin_log.c_str(), "w");
-  
+
   fprintf(pluginFile, "Initializing interprocess memory...\n");
   fflush(pluginFile);
 }
@@ -134,7 +134,7 @@ extern "C" void EXPORT_API UnitySetGraphicsDevice (void* device, int deviceType,
 
 	// Set device type to -1, i.e. "not recognized by our plugin"
 	g_DeviceType = -1;
-	
+
 
 	#if SUPPORT_OPENGL
 	// If we've got an OpenGL device, remember device type. There's no OpenGL
@@ -253,7 +253,7 @@ FrameData *data;
 static void DoRendering (const float* worldMatrix, const float* identityMatrix, float* projectionMatrix, const MyVertex* verts)
 {
 	// Does actual rendering of a simple triangle
-    
+
 //    fprintf(pluginFile, "%i: DoRendering()\n", logCount);
 //    fflush(pluginFile);
     logCount++;
@@ -283,7 +283,7 @@ static void DoRendering (const float* worldMatrix, const float* identityMatrix, 
 
 //        fprintf(pluginFile, "%i: DrawArrays()\n", logCount);
 //        fflush(pluginFile);
-        
+
 		// Draw!
 		//glDrawArrays (GL_TRIANGLES, 0, 3);
 
@@ -297,20 +297,20 @@ static void DoRendering (const float* worldMatrix, const float* identityMatrix, 
 			int texWidth, texHeight;
 			glGetTexLevelParameteriv (GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &texWidth);
 			glGetTexLevelParameteriv (GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &texHeight);
-            
+
 //            fprintf(pluginFile, "%i: Set texture.\n", logCount);
 //            fflush(pluginFile);
             fprintf(pluginFile, "Tex width: %i  Tex height: %i\n", texWidth, texHeight);
 			fflush(pluginFile);
-            
+
             //if(startedServer)
             //{
 //                fprintf(pluginFile, "%i: Allocating texture.\n", logCount);
 //                fflush(pluginFile);
-               
+
                 //glTexSubImage2D (GL_TEXTURE_2D, 0, 0, 0, texWidth, texHeight, GL_RGBA, GL_UNSIGNED_BYTE, data);
-                
-                
+
+
 				unsigned char tempData[1280*720*3] = {0};
                 glGetTexImage(GL_TEXTURE_2D,0,GL_RGB,GL_UNSIGNED_BYTE,data->pixels);
 //      			int err = glGetError();
@@ -319,9 +319,9 @@ static void DoRendering (const float* worldMatrix, const float* identityMatrix, 
 //				for(int i=26664; i<26664+20; i++)
 //				{
 //					if(tempData[i] != 0)
-//					{		
+//					{
 //						fprintf(pluginFile, "tempData[%i]: %u  ", i, tempData[i]);
-//					}  
+//					}
 //				}
 //				fprintf(pluginFile,"\n");
 //				fflush(pluginFile);
@@ -330,69 +330,69 @@ static void DoRendering (const float* worldMatrix, const float* identityMatrix, 
                 /*
                  *  Encode image into NALs with x264
                  */
-      
+
 //                AVFrame *frame1 = avcodec_alloc_frame();
 //                frame1->format = AV_PIX_FMT_YUV420P;
 //                frame1->width  = image_width;//c->width;
 //                frame1->height = image_height;//c->height;
 //                int ret2 = av_image_alloc(frame1->data, frame1->linesize, frame1->width, frame1->height, AV_PIX_FMT_YUV420P, 32);
-//                
+//
 //                avpicture_fill((AVPicture *) frame1, pixels, AV_PIX_FMT_RGB24,image_width,image_height);
 //                //    if(frameRGB->linesize[0] >0){
 //                //        frameRGB->data[0] += frameRGB->linesize[0]*(c->height -1);
 //                //
 //                //        frameRGB->linesize[0] = -frameRGB->linesize[0];
 //                //    }
-//                
+//
 //                //Flip the image before encoding
 //                frame1->data[0] += frame1->linesize[0]*(image_height -1);
 //                frame1->linesize[0] = -frame1->linesize[0];
 //                sws_scale(convertCtx, frame1->data, frame1->linesize,0, image_height, (u_int8_t *const *)pic_in.img.plane, (const int*)pic_in.img.i_stride);
-//                
+//
 //                x264_nal_t* nals = NULL;
 //                int i_nals = 0;
 //                int frame_size = -1;
-//                
+//
 //                //printf("encoding... \n");
-//                
+//
 //                frame_size = x264_encoder_encode(encoder, &nals, &i_nals, &pic_in, &pic_out);
-//                
+//
 //                static bool finished = false;
-//                
+//
 //                if (frame_size >= 0)
 //                {
 //                  static bool alreadydone = false;
 //                  if(!alreadydone)
 //                  {
 //                    //printf("adding headers?... \n");
-//                    
+//
 //                    //x264_encoder_headers(encoder, &nals, &i_nals);
 //                    alreadydone = true;
 //                  }
-//                  
+//
 //                }
-//                
+//
 //                for(int i = 0; i < i_nals; ++i)
 //                {
 //                  //printf("adding to queue... \n");
 //                  m_queue.push(nals[i]);
 //                }
-      
-      
+
+
                 //std::memset(region.get_address(), logCount, region.get_size());
-      
-      
+
+
                 //memcpy(region.get_address(), pixels, image_width*image_height*3);
-            
+
 //                pthread_mutex_lock(&mutex);
 //                avpicture_fill((AVPicture *) iframe, pixels, AV_PIX_FMT_RGB24,image_width,image_height);
 //                pthread_mutex_unlock(&mutex);
-            
+
 //                fprintf(pluginFile, "%i: After uploading frame\n", logCount);
 //                fflush(pluginFile);
                 //delete[] pixels;
             //}
-            
+
 			//unsigned char* data = new unsigned char[texWidth*texHeight*4];
 			//FillTextureFromCode (texWidth, texHeight, texHeight*4, data);
 			//glTexSubImage2D (GL_TEXTURE_2D, 0, 0, 0, texWidth, texHeight, GL_RGBA, GL_UNSIGNED_BYTE, data);
@@ -403,6 +403,7 @@ static void DoRendering (const float* worldMatrix, const float* identityMatrix, 
 }
 
 #define PORT 7000
+#define QPORT 8008
 float a1 = 0;
 float a2 = 0;
 float a3 = 0;
@@ -410,6 +411,10 @@ float a4 = 0;
 float a5 = 0;
 float a6 = 0;
 float a7 = 0;
+float q1 = 0;
+float q2 = 0;
+float q3 = 0;
+float q4 = 0;
 extern "C" {
     int startStream();
     int initInterprocessMemory();
@@ -420,8 +425,13 @@ extern "C" {
     float getTouchY();
     float getDragX();
     float getDragY();
+	float getPSQuatX();
+	float getPSQuatY();
+	float getPSQuatZ();
+	float getPSQuatW();
 	void endServer();
     void oscStart();
+  void oscPhaseSpaceStart();
 }
 void endServer()
 {
@@ -460,19 +470,71 @@ float getDragY()
 {
 	return a7;
 }
+float getPSQuatX()
+{
+	return q1;
+}
+float getPSQuatY()
+{
+	return q2;
+}
+float getPSQuatZ()
+{
+	return q3;
+}
+float getPSQuatW()
+{
+	return q4;
+}
 
-class OrientationPacketListener : public osc::OscPacketListener {
+class QuaternionPacketListener : public osc::OscPacketListener {
 protected:
-    
+
     virtual void ProcessMessage( const osc::ReceivedMessage& m,
                                 const IpEndpointName& remoteEndpoint )
     {
         (void) remoteEndpoint; // suppress unused parameter warning
-        
+
         try{
             // example of parsing single messages. osc::OsckPacketListener
             // handles the bundle traversal.
-            
+
+            // example #2 -- argument iterator interface, supports
+            // reflection for overloaded messages (eg you can call
+            // (*arg)->IsBool() to check if a bool was passed etc).
+            osc::ReceivedMessage::const_iterator arg = m.ArgumentsBegin();
+            q1 = (arg++)->AsFloat();
+            q2 = (arg++)->AsFloat();
+            q3 = (arg++)->AsFloat();
+            q4 = (arg++)->AsFloat();
+
+            if( arg != m.ArgumentsEnd() )
+                throw osc::ExcessArgumentException();
+
+			//fprintf(pluginFile, "Yaw: %f, Pitch: %f, Roll: %f \n", a1, a2, a3);
+			//fflush(pluginFile);
+
+        }catch( osc::Exception& e ){
+            // any parsing errors such as unexpected argument types, or
+            // missing arguments get thrown as exceptions.
+            std::cout << "error while parsing message: "
+            << m.AddressPattern() << ": " << e.what() << "\n";
+        }
+    }
+};
+
+class OrientationPacketListener : public osc::OscPacketListener {
+protected:
+
+    virtual void ProcessMessage( const osc::ReceivedMessage& m,
+                                const IpEndpointName& remoteEndpoint )
+    {
+        (void) remoteEndpoint; // suppress unused parameter warning
+
+        try{
+            // example of parsing single messages. osc::OsckPacketListener
+            // handles the bundle traversal.
+
             // example #2 -- argument iterator interface, supports
             // reflection for overloaded messages (eg you can call
             // (*arg)->IsBool() to check if a bool was passed etc).
@@ -484,13 +546,13 @@ protected:
             a5 = (arg++)->AsFloat();
             a6 = (arg++)->AsFloat();
             a7 = (arg++)->AsFloat();
-            
+
             if( arg != m.ArgumentsEnd() )
                 throw osc::ExcessArgumentException();
-            
+
 			//fprintf(pluginFile, "Yaw: %f, Pitch: %f, Roll: %f \n", a1, a2, a3);
 			//fflush(pluginFile);
-            
+
         }catch( osc::Exception& e ){
             // any parsing errors such as unexpected argument types, or
             // missing arguments get thrown as exceptions.
@@ -501,6 +563,7 @@ protected:
 };
 
 UdpListeningReceiveSocket* s = NULL;
+UdpListeningReceiveSocket* qs = NULL;
 //UdpListeningReceiveSocket s;
 void oscStart()
 {
@@ -509,16 +572,28 @@ void oscStart()
      */
 	OrientationPacketListener listener;
     s = new UdpListeningReceiveSocket(IpEndpointName( IpEndpointName::ANY_ADDRESS, PORT ), &listener );
-    
+
     s->Run();
 }
 
-unsigned char testPixels[image_width*image_height*3];
+void oscPhaseSpaceStart()
+{
+	/*
+     * Start OSC client
+     */
+	QuaternionPacketListener qlistener;
+    qs = new UdpListeningReceiveSocket(IpEndpointName( IpEndpointName::ANY_ADDRESS, QPORT ), &qlistener );
+
+    qs->Run();
+}
+
+
+// unsigned char testPixels[image_width*image_height*3];
 int initInterprocessMemory()
 {
-    
 
-    
+
+
 	/*
      * Initialize shared memory between Unity plugin and the Live 555 server/encoder
      */
@@ -528,30 +603,30 @@ int initInterprocessMemory()
         shm_remove() { shared_memory_object::remove("MySharedMemory"); }
         ~shm_remove(){ shared_memory_object::remove("MySharedMemory"); }
     } remover;
-    
+
     //Create a shared memory object.
     shm = shared_memory_object(create_only, "MySharedMemory", read_write);
-    
+
     //Set size
     shm.truncate(sizeof(FrameData));
-    
+
     //Map the whole shared memory in this process
     region = mapped_region(shm, read_write);
-    
-    
+
+
     //Write all the memory to 1
     //std::memset(region.get_address(), 2, region.get_size());
-    
+
     //Get the address of the mapped region
     void * addr       = region.get_address();
-    
+
     //Construct the shared structure in memory
     data = new (addr) FrameData;
 
 
-    
 
-    
+
+
 //    for(int i=0; i<2048*2048*3; i++)
 //    {
 //        data->pixels[i] = rand() % 255;
@@ -561,27 +636,27 @@ int initInterprocessMemory()
      * Start server process
      * Will not return until endServer() is called
      */
-    
-//   if(0 != std::system("/home/mathieu/Desktop/AlloStreamerServer/AlloServer/AlloServer"))
-//        return 1;
-    
-    //AlloServer is finished, so shutdown OSC
-while(true)
-{
-usleep(16000);
-}
 
+   if(0 != std::system("/home/mathieu/Desktop/AlloStreamerServer/AlloServer/AlloServer"))
+        return 1;
+
+    //AlloServer is finished, so shutdown OSC
     if(s != NULL)
     {
         s->AsynchronousBreak();
         delete s;
         s = NULL;
     }
-    
+    if(qs != NULL)
+    {
+        qs->AsynchronousBreak();
+        delete qs;
+        qs = NULL;
+    }
+
     fprintf(pluginFile,"AlloServer exited\n");
     fflush(pluginFile);
-    
-    
+
+
     return 0;
 }
-
